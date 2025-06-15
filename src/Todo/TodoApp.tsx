@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Download, Upload } from 'lucide-react';
+import { Plus, Download, Settings, X } from 'lucide-react';
 
 interface TodoItem {
   id: string;
@@ -28,6 +28,7 @@ export default function TodoApp() {
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [moveCompletedToEnd, setMoveCompletedToEnd] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Carregar dados quando o componente inicializa
   useEffect(() => {
@@ -129,6 +130,7 @@ export default function TodoApp() {
         setMoveCompletedToEnd(importedData.moveCompletedToEnd);
         setHideCompleted(importedData.hideCompleted);
         alert('Dados importados com sucesso!');
+        setShowSettingsModal(false);
       } catch (error) {
         alert('Erro ao importar arquivo. Verifique se é um arquivo válido.');
       }
@@ -210,30 +212,17 @@ export default function TodoApp() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-4 p-4 bg-white rounded-lg shadow-lg min-h-screen">
+    <div className="max-w-md mx-auto mt-4 p-4 bg-white rounded-lg shadow-lg">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Lista de Tarefas</h1>
-        
-        {/* Botões de Backup */}
-        <div className="flex gap-2 mb-4 bg-blue-50 rounded-md">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Lista de Tarefas</h1>
           <button
-            onClick={exportData}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors flex-1"
+            onClick={() => setShowSettingsModal(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
+            title="Configurações"
           >
-            <Download size={16} />
-            Exportar
+            <Settings size={16} />
           </button>
-          
-          <label className="flex items-center gap-2 px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors cursor-pointer flex-1">
-            <Upload size={16} />
-            Importar
-            <input
-              type="file"
-              accept=".json"
-              onChange={importData}
-              className="hidden"
-            />
-          </label>
         </div>
         
         {/* Seletor de Lista + Botões */}
@@ -289,7 +278,7 @@ export default function TodoApp() {
         )}
 
         {/* Configurações */}
-        <div className="flex flex-col gap-2 mb-4 p-3 bg-gray-50 rounded-md">
+        <div className="flex gap-4 mb-4 p-3 bg-gray-50 rounded-md">
           <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
             <input
               type="checkbox"
@@ -451,6 +440,72 @@ export default function TodoApp() {
           {selectedList.items.filter(item => item.completed).length} de {selectedList.items.length} tarefas concluídas
           <div className="text-xs text-gray-500 mt-1">
             💾 Dados salvos automaticamente
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Configurações */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Configurações</h2>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              {/* Backup e Importação */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Backup e Dados</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={exportData}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+                  >
+                    <Download size={16} />
+                    Exportar dados
+                  </button>
+                  
+                  <label className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors cursor-pointer">
+                    <span>📁 Importar dados</span>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={importData}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Exporte para fazer backup ou importe um arquivo JSON com suas listas e tarefas
+                  </p>
+                </div>
+              </div>
+
+              {/* Informações */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Informações</h3>
+                <p className="text-xs text-gray-500">
+                  • Seus dados são salvos automaticamente no navegador
+                  • Use exportar/importar para fazer backup
+                  • Total de listas: {lists.length}
+                  • Total de tarefas: {lists.reduce((acc, list) => acc + list.items.length, 0)}
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 p-4">
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
